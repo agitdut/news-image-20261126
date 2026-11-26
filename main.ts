@@ -1,6 +1,6 @@
 // news-image-20261126 — "The World in One Day"
 // A one-page newspaper front page summing up Thursday 26 November 2026:
-// 1 lead story + 6 featured stories + 16 briefs = 23 stories across 5 continents.
+// 1 lead story + 6 featured stories + 24 briefs = 31 stories across 5 continents.
 // Drawn from scratch: framebuffer + 5x7 bitmap font + palette PNG encoder
 // (LZ77 + fixed-Huffman DEFLATE written by hand, stdlib only, no network).
 // Deterministic: no clock, no randomness — two runs write identical bytes.
@@ -76,6 +76,12 @@ function circle(cx: number, cy: number, r: number, c: number): void {
   }
 }
 function line(x0: number, y0: number, x1: number, y1: number, c: number): void {
+  // Round up front: callers may pass scaled (fractional) coordinates, and
+  // Bresenham only terminates when its integer steps can reach the target.
+  x0 = Math.round(x0);
+  y0 = Math.round(y0);
+  x1 = Math.round(x1);
+  y1 = Math.round(y1);
   const dx = Math.abs(x1 - x0);
   const dy = -Math.abs(y1 - y0);
   const sx = x0 < x1 ? 1 : -1;
@@ -623,6 +629,14 @@ const BRIEFS: string[] = [
   "CHESS: WORLD TITLE MATCH LEVEL 1-1 AS GAME 3 OPENS IN GENEVA",
   "INDIA: 18 YEARS SINCE THE 26/11 MUMBAI ATTACKS, NATION REMEMBERS",
   "GAZA: STORM THREATENS 1.76 MILLION PEOPLE IN MAKESHIFT SHELTERS",
+  "USA: ARMY DESTROYS 4.5 TONNES OF AGEING EXPLOSIVES IN HUGE IOWA BLAST",
+  "CLIMATE: EXTREME EL NINO FUELS FEARS FOR THE AMAZON AFTER WEEKS OF SEVERE WEATHER",
+  "SPAIN: PUIGDEMONT TO RETURN TO SPAIN ON 12 DECEMBER",
+  "JAPAN: WIFE OF JOURNALIST HELD IN RUSSIA PLEADS FOR HIS RELEASE",
+  "USA: THIRD-QUARTER GDP GROWTH REVISED SHARPLY HIGHER",
+  "SOUTH AFRICA: RAMAPHOSA WINS FIGHT TO SET ASIDE PHALA PHALA REPORT",
+  "EU: 50 BILLION EURO TECH FUND PLANNED TO RIVAL THE US AND CHINA",
+  "USA: TRUMP SPARES TURKEYS FREEDOM AND FEATHERS FOR THANKSGIVING",
 ];
 
 // ---------------------------------------------------------------- layout
@@ -638,7 +652,7 @@ function drawMasthead(): void {
   drawCentered("THE WORLD IN ONE DAY", 512, 36, 5, INK);
   drawCentered("THURSDAY 26 NOVEMBER 2026", 512, 78, 3, RED);
   drawCentered(
-    "DATE CHECK: 26 NOVEMBER 2026 WAS A THURSDAY - 23 STORIES ACROSS FIVE CONTINENTS",
+    "DATE CHECK: 26 NOVEMBER 2026 WAS A THURSDAY - 31 STORIES ACROSS FIVE CONTINENTS",
     512,
     106,
     1,
@@ -663,43 +677,43 @@ function drawLead(): void {
 
 function drawFeatured(): void {
   const pw = 482;
-  const ph = 122;
+  const ph = 104;
   const xs = [20, 522];
-  const ys = [284, 414, 544];
+  const ys = [284, 398, 512];
   FEATURED.forEach((s, i) => {
     const x = xs[i % 2];
     const y = ys[Math.floor(i / 2)];
     rect(x, y, pw, ph, TINT);
     frame(x, y, pw, ph, INK, 1);
-    tagChip(s.tag, x + 10, y + 9, s.tagColor);
-    s.icon(x + pw - 96, y + 34, 1);
+    tagChip(s.tag, x + 10, y + 8, s.tagColor);
+    s.icon(x + pw - 96, y + 26, 0.9);
     const textW = pw - 118;
-    const headLines = drawBlock(s.headline, x + 10, y + 32, textW, 2, INK, 16);
-    drawBlock(s.body, x + 10, y + 32 + headLines * 16 + 6, textW, 1, INK, 10);
+    const headLines = drawBlock(s.headline, x + 10, y + 28, textW, 2, INK, 15);
+    drawBlock(s.body, x + 10, y + 28 + headLines * 15 + 4, textW, 1, INK, 9);
   });
 }
 
 function drawBriefs(): void {
-  const y0 = 678;
+  const y0 = 626;
   rect(20, y0, 984, 26, RED);
   drawText("THE DAY IN BRIEF", 32, y0 + 6, 2, WHITE);
-  const right = "16 MORE STORIES";
+  const right = "24 MORE STORIES";
   drawText(right, 1004 - 12 - textWidth(right, 1), y0 + 9, 1, WHITE);
   const colW = 470;
   const colX = [20, 522];
   BRIEFS.forEach((b, i) => {
-    const col = Math.floor(i / 8);
-    const row = i % 8;
+    const col = Math.floor(i / 12);
+    const row = i % 12;
     const x = colX[col];
-    const y = 714 + row * 34;
+    const y = 662 + row * 27;
     rect(x + 2, y + 2, 6, 6, RED);
     drawBlock(b, x + 14, y, colW, 1, INK, 10);
   });
 }
 
 function drawFooter(): void {
-  hline(20, 994, 984, 1, INK);
-  drawCentered("COMPILED FROM WIRE REPORTS - MAKE.FUN NEWS-IMAGE-20261126", 512, 1002, 1, INK);
+  hline(20, 992, 984, 1, INK);
+  drawCentered("COMPILED FROM WIRE REPORTS - MAKE.FUN NEWS-IMAGE-20261126", 512, 998, 1, INK);
 }
 
 function drawPage(): void {
